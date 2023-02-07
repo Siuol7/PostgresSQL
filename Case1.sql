@@ -60,20 +60,6 @@ VALUES
    --------------------*/
 
 -- 1. What is the total amount each customer spent at the restaurant?
-
--- 2. How many days has each customer visited the restaurant?
--- 3. What was the first item from the menu purchased by each customer?
--- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
--- 5. Which item was the most popular for each customer?
--- 6. Which item was purchased first by the customer after they became a member?
--- 7. Which item was purchased just before the customer became a member?
--- 8. What is the total items and amount spent for each member before they became a member?
--- 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
--- 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
-
--- Example Query:
-
-#1
 SELECT
   	customer_id,SUM(price) AS total
 FROM dannys_diner.sales
@@ -81,12 +67,14 @@ INNER JOIN dannys_diner.menu
 USING (product_id)
 GROUP BY 1
 
-#2
+
+
+-- 2. How many days has each customer visited the restaurant?
 SELECT customer_id,COUNT( DISTINCT DATE(order_date)) AS visits
 FROM dannys_diner.sales
 GROUP BY 1
 
-#3
+-- 3. What was the first item from the menu purchased by each customer?
 SELECT m.customer_id,n.product_name 
 FROM (SELECT customer_id,order_date,product_id, ROW_NUMBER() OVER(PARTITION BY customer_id ORDER BY order_date) AS seq
 FROM dannys_diner.sales) m
@@ -94,14 +82,14 @@ INNER JOIN dannys_diner.menu n
 USING(product_id)
 WHERE m.seq =1
 
-#4
+-- 4. What is the most purchased item on the menu and how many times was it purchased by all customers?
 SELECT m.product_id,COUNT(m.product_id) as numbers, n.product_name
 FROM dannys_diner.sales m
 INNER JOIN dannys_diner.menu as n
 USING(product_id)
 GROUP BY 1,3
 
-#5
+-- 5. Which item was the most popular for each customer?
 SELECT m.customer_id,n.product_name
 FROM(
 SELECT customer_id,product_id,DENSE_RANK() OVER(PARTITION BY customer_id ORDER BY COUNT(product_id) DESC) AS rnk
@@ -112,7 +100,8 @@ USING(product_id)
 WHERE rnk=1
 ORDER BY 1
 
-#6
+
+-- 6. Which item was purchased first by the customer after they became a member?
 WITH cte AS (SELECT m.customer_id,m.order_date,m.product_id,n.product_name,ROW_NUMBER() OVER(PARTITION BY m.customer_id ORDER BY m.order_date ASC) AS rnk
 FROM dannys_diner.sales m
 INNER JOIN dannys_diner.members o
@@ -122,7 +111,7 @@ USING(product_id))
 SELECT customer_id,order_date,product_id,product_name FROM cte
 WHERE rnk=1
 
-#7
+-- 7. Which item was purchased just before the customer became a member?
 WITH cte AS (SELECT m.customer_id,m.order_date,m.product_id,n.product_name,ROW_NUMBER() OVER(PARTITION BY m.customer_id ORDER BY m.order_date DESC) AS rnk
 FROM dannys_diner.sales m
 INNER JOIN dannys_diner.members o
@@ -132,7 +121,7 @@ USING(product_id))
 SELECT customer_id,order_date,product_id,product_name FROM cte
 WHERE rnk=1
 
-#8
+-- 8. What is the total items and amount spent for each member before they became a member?
 WITH cte AS (SELECT m.customer_id,m.order_date,m.product_id,n.product_name,n.price,ROW_NUMBER() OVER(PARTITION BY m.customer_id ORDER BY m.order_date DESC) AS rnk
 FROM dannys_diner.sales m
 INNER JOIN dannys_diner.members o
@@ -145,7 +134,7 @@ GROUP BY 1
 ORDER BY 1
 
 
-#9
+-- 9.  If each $1 spent equates to 10 points and sushi has a 2x points multiplier - how many points would each customer have?
 WITH cte AS(SELECT m.customer_id,
 		CASE
         	WHEN n.product_name='sushi' THEN n.price*20
@@ -160,7 +149,7 @@ GROUP BY 1
 ORDER BY 1
 
 
-#10
+-- 10. In the first week after a customer joins the program (including their join date) they earn 2x points on all items, not just sushi - how many points do customer A and B have at the end of January?
 WITH cte AS (SELECT m.customer_id,
 			CASE
             	WHEN n.product_name='sushi' THEN n.price*20
@@ -178,3 +167,11 @@ SELECT customer_id, SUM(points) AS Total_points
 FROM cte
 GROUP BY 1
 ORDER BY 1
+
+
+
+
+
+
+
+
