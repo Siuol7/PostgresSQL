@@ -186,5 +186,23 @@ LEFT JOIN exc2 exc
 USING (topping_name)
 
 
+--What is the most common combination of at least 1 quantity of any 3 products in a 1 single transaction?
+WITH cte AS (SELECT txn_id,prod_id,product_name 
+FROM balanced_tree.sales s
+INNER JOIN balanced_tree.product_details pd
+ON pd.product_id=s.prod_id
+ORDER BY 1,2)
+
+SELECT c1.product_name,c2.product_name,c3.product_name,COUNT(c1.txn_id) AS Number_txn
+FROM cte c1
+INNER JOIN cte c2
+ON c1.txn_id=c2.txn_id AND c1.prod_id<c2.prod_id
+INNER JOIN cte c3
+ON c2.txn_id=c3.txn_id AND c2.prod_id<c3.prod_id
+GROUP BY 1,2,3
+ORDER BY 4 DESC 
+LIMIT 1
+
+
 
 

@@ -23,8 +23,8 @@
 --Ensure all null string values with an "unknown" string value in the original segment column as well as the new age_band and demographic columns
 
 --Generate a new avg_transaction column as the sales value divided by transactions rounded to 2 decimal places for each record
-SELECT  TO_DATE(week_date,'DD/MM/YY'), EXTRACT(WEEK FROM TO_DATE(week_date,'DD/MM/YY')) AS week_number, EXTRACT(MONTH FROM TO_DATE(week_date,'DD/MM/YY')) AS month_number,
-		EXTRACT(YEAR FROM TO_DATE(week_date,'DD/MM/YY')),
+SELECT  TO_DATE(week_date,'DD/MM/YY') as week_date, EXTRACT(WEEK FROM TO_DATE(week_date,'DD/MM/YY')) AS week_number, EXTRACT(MONTH FROM TO_DATE(week_date,'DD/MM/YY')) AS month_number,
+		EXTRACT(YEAR FROM TO_DATE(week_date,'DD/MM/YY')) AS Year, region, platform, customer_type,
 		CASE
 			WHEN RIGHT(segment,1)='1' THEN 'Young Adults'
 			WHEN right(segment,1)='2' THEN 'Middle Aged'
@@ -36,6 +36,7 @@ SELECT  TO_DATE(week_date,'DD/MM/YY'), EXTRACT(WEEK FROM TO_DATE(week_date,'DD/M
 			WHEN segment IS NULL THEN 'unknown'
 			ELSE 'Family'
 		END AS demographic,
-		ROUND(sales::NUMERIC/transactions::NUMERIC,2) AS avg_transactions
+		ROUND(sales::NUMERIC/transactions::NUMERIC,2) AS avg_transactions, sales
+INTO data_mart.clean_weekly_sales
 FROM data_mart.weekly_sales
 		
